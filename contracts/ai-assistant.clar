@@ -24,3 +24,15 @@
         (map-set token-data {token-id: token-id} {topic: topic, data: data})
         (var-set next-token-id (+ token-id u1))
         (ok token-id)))
+
+;; Update knowledge data (only by token owner)
+(define-public (update-knowledge (token-id uint) (new-data (string-utf8 1024)))
+    (let ((owner (unwrap! (nft-get-owner? ai-knowledge token-id) err-not-token-owner)))
+        (asserts! (is-eq tx-sender owner) err-not-token-owner)
+        (let ((current-data (unwrap-panic (map-get? token-data {token-id: token-id}))))
+            (ok (map-set token-data {token-id: token-id}
+                {topic: (get topic current-data), data: new-data})))))
+
+;; Get knowledge data
+(define-read-only (get-knowledge (token-id uint))
+    (map-get? token-data {token-id: token-id}))
