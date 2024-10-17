@@ -36,3 +36,23 @@
 ;; Get knowledge data
 (define-read-only (get-knowledge (token-id uint))
     (map-get? token-data {token-id: token-id}))
+
+;; Get token URI
+(define-read-only (get-token-uri (token-id uint))
+    (map-get? token-uris {token-id: token-id}))
+
+;; SIP009 NFT Interface Implementation
+
+(define-public (transfer (token-id uint) (sender principal) (recipient principal))
+    (begin
+        (asserts! (is-eq tx-sender sender) err-not-token-owner)
+        (nft-transfer? ai-knowledge token-id sender recipient)))
+
+(define-public (get-last-token-id)
+    (ok (- (var-get next-token-id) u1)))
+
+(define-read-only (get-token-owner (token-id uint))
+    (ok (nft-get-owner? ai-knowledge token-id)))
+
+(define-read-only (get-balance (account principal))
+    (ok (nft-get-balance? ai-knowledge account)))
